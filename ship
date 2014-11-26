@@ -1,0 +1,46 @@
+#!/bin/sh
+
+case $# in
+  0)
+    # TODO go up the hierarchy to find .ship
+    source .ship
+
+    ssh $SERVER "
+      cd $DESTINATION
+      git pull origin master
+    "
+    ;;
+
+  3)
+    if [ "$1" == "init" ]
+    then
+      SERVER=$2
+      DESTINATION=$3
+      CLONEURL=`git config --get remote.origin.url`
+
+      ssh $SERVER "
+        if [ -a $DESTINATION ]
+        then
+          echo "Error: Destination exists"
+          exit 1
+        else
+          git clone $CLONEURL $DESTINATION
+          chgrp ship -R $DESTINATION
+        fi
+      "
+
+      if [ $? -eq 0 ]
+      then
+        echo "SERVER=$SERVER" > .ship
+        echo "DESTINATION=$DESTINATION" >> .ship
+      fi
+    else
+      echo "Error: Invalid argument '$1'"
+    fi
+    ;;
+
+  *)
+    echo "Error: Invalid number of arguments"
+    exit 1
+    ;;
+esac
