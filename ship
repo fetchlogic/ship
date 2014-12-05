@@ -5,7 +5,7 @@ case $# in
     # TODO go up the hierarchy to find .ship
     source .ship
 
-    ssh $SERVER "
+    ssh captain@$SERVER "
       cd $DESTINATION
       git pull origin master
     "
@@ -18,14 +18,13 @@ case $# in
       DESTINATION=$3
       CLONEURL=`git config --get remote.origin.url`
 
-      ssh $SERVER "
+      ssh captain@$SERVER "
         if [ -a $DESTINATION ]
         then
           echo "Error: Destination exists"
           exit 1
         else
           git clone $CLONEURL $DESTINATION
-          chgrp ship -R $DESTINATION
         fi
       "
 
