@@ -2,29 +2,63 @@
 
 case $# in
   0)
-    # TODO go up the hierarchy to find .ship
-    source .ship
+    while [[ "$PWD" != "/" ]]
+    do
+      if [[ -e ".ship" ]]
+      then
+        source .ship
+        break
+      fi
 
-    COMMANDS="cd $DESTINATION;"
+      cd ..
+    done
 
-    if [ -n "$BEFORE" ]; then
+    if [[ -n "$USER" && -n "$SERVER" && -n "DESTINATION" ]]
+    then
+      COMMANDS="cd $DESTINATION;"
+
+      if [ -n "$BEFORE" ]
+      then
         COMMANDS="$COMMANDS $BEFORE;"
-    fi
+      fi
 
-    COMMANDS="$COMMANDS git pull origin master;"
-    COMMANDS="$COMMANDS [ -e composer.json ] && composer install;"
-    COMMANDS="$COMMANDS [ -e package.json ] && npm install;"
+      COMMANDS="$COMMANDS git pull origin master;"
+      COMMANDS="$COMMANDS [ -e composer.json ] && composer install;"
+      COMMANDS="$COMMANDS [ -e package.json ] && npm install;"
 
-    if [ -n "$AFTER" ]; then
+      if [ -n "$AFTER" ]
+      then
         COMMANDS="$COMMANDS $AFTER;"
-    fi
+      fi
 
-    ssh $USERNAME@$SERVER "$COMMANDS"
+      ssh $USER@$SERVER "$COMMANDS"
+    else
+      if [[ -e ".ship" ]]
+      then
+        if [ -z "$USER" ]
+        then
+          MISSING="USER"
+        elif [ -z "$SERVER" ]
+        then
+          MISSING="SERVER"
+        elif [ -z "$DESTINATION" ]
+        then
+          MISSING="DESTINATION"
+        fi
+
+        echo "Error: .ship found, but is missing $MISSING."
+      else
+        echo "Error: Unable to locate .ship"
+      fi
+
+      exit 1
+    fi
     ;;
 
   4)
-    if [ "$1" == "init" ]; then
-      USERNAME=$2
+    if [ "$1" == "init" ]
+    then
+      USER=$2
       SERVER=$3
       DESTINATION=$4
       CLONEURL=`git config --get remote.origin.url`
@@ -38,8 +72,9 @@ case $# in
         fi
       "
 
-      if [ $? -eq 0 ]; then
-        echo "USERNAME=$USERNAME"       >  .ship
+      if [ $? -eq 0 ]
+      then
+        echo "USER=$USER"       >  .ship
         echo "SERVER=$SERVER"           >> .ship
         echo "DESTINATION=$DESTINATION" >> .ship
       fi
@@ -49,7 +84,7 @@ case $# in
     ;;
 
   *)
-    echo "Usage: ship [init username server destination]"
+    echo "Usage: ship [init user server destination]"
     exit 1
     ;;
 esac
