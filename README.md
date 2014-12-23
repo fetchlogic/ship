@@ -36,3 +36,4 @@ initializing the remote deployment location on the specified server.
 Deployments are performed by running `ship` anywhere in a previously
 initialized project.
 
+[joshtronic]: http://joshtronic.com
