@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SSH="ssh -o ForwardAgent=yes"
+
 case $# in
   0)
     while [[ "$PWD" != "/" ]]
@@ -31,7 +33,7 @@ case $# in
         COMMANDS="$COMMANDS $AFTER;"
       fi
 
-      ssh $USER@$SERVER "$COMMANDS"
+      $SSH $USER@$SERVER "$COMMANDS"
     else
       if [[ -e ".ship" ]]
       then
@@ -68,9 +70,15 @@ case $# in
       echo -n "Destination on server to deploy to: "
       read DESTINATION
 
+      echo -n "Commands to run before shipment (optional): "
+      read BEFORE
+
+      echo -n "Commands to run after shipment (also optional): "
+      read AFTER
+
       CLONEURL=`git config --get remote.origin.url`
 
-      ssh captain@$SERVER "
+      $SSH $USER@$SERVER "
         if [ -a $DESTINATION ]
         then
           echo "Error: Destination exists"
@@ -83,6 +91,16 @@ case $# in
       echo "USER=$USER"               >  .ship
       echo "SERVER=$SERVER"           >> .ship
       echo "DESTINATION=$DESTINATION" >> .ship
+
+      if [ -n "$BEFORE" ]
+      then
+        echo "BEFORE=$BEFORE" >> .ship
+      fi
+
+      if [ -n "$AFTER" ]
+      then
+        echo "AFTER=$AFTER" >> .ship
+      fi
     else
       echo "Error: Invalid argument '$1'"
     fi
