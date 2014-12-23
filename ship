@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 case $# in
   0)
@@ -24,7 +24,7 @@ case $# in
 
       COMMANDS="$COMMANDS git pull origin master;"
       COMMANDS="$COMMANDS [ -e composer.json ] && composer install;"
-      COMMANDS="$COMMANDS [ -e package.json ] && npm install;"
+      COMMANDS="$COMMANDS [ -e package.json ]  && npm install;"
 
       if [ -n "$AFTER" ]
       then
@@ -55,16 +55,24 @@ case $# in
     fi
     ;;
 
-  4)
+  1)
     if [ "$1" == "init" ]
     then
-      USER=$2
-      SERVER=$3
-      DESTINATION=$4
+      echo -n "Remote user to ship as [captain]: "
+      read USER
+      USER=${USER:-captain}
+
+      echo -n "Server to deploy to: "
+      read SERVER
+
+      echo -n "Destination on server to deploy to: "
+      read DESTINATION
+
       CLONEURL=`git config --get remote.origin.url`
 
       ssh captain@$SERVER "
-        if [ -a $DESTINATION ]; then
+        if [ -a $DESTINATION ]
+        then
           echo "Error: Destination exists"
           exit 1
         else
@@ -72,19 +80,16 @@ case $# in
         fi
       "
 
-      if [ $? -eq 0 ]
-      then
-        echo "USER=$USER"       >  .ship
-        echo "SERVER=$SERVER"           >> .ship
-        echo "DESTINATION=$DESTINATION" >> .ship
-      fi
+      echo "USER=$USER"               >  .ship
+      echo "SERVER=$SERVER"           >> .ship
+      echo "DESTINATION=$DESTINATION" >> .ship
     else
       echo "Error: Invalid argument '$1'"
     fi
     ;;
 
   *)
-    echo "Usage: ship [init user server destination]"
+    echo "Usage: ship [init]"
     exit 1
     ;;
 esac
