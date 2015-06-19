@@ -9,7 +9,7 @@ on either the remote server or for new developers on the project.
 
 The only dependencies of `ship` are that you must have access to the repository
 because we use `ForwardAgent` and access to the remote server as the configured
-user We accomplish this by using `ssh-copy-id username@server` from each
+user. We accomplish this by using `ssh-copy-id username@server` from each
 trusted system. This project allows multiple developers to be able to ship code
 out to production without setting up deployment keys, webhooks or any other
 manual steps when working with a fresh local copy.
